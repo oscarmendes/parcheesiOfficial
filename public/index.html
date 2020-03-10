@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+<body>
+    
+<div class="container">
+    <div class="left-section">
+        <div class="message-box">
+            <ul>
+                <li>Krishna: Hello there!</li>
+                <li>Shenphen: Hi :)</li>
+                <li>Oscar: Hello</li>
+                <li>Ghost: Hi guys</li>
+            </ul>
+        </div>
+        <div class="chatbox">
+            <input type="text" placeholder="Type here...">
+        </div>
+        <div class="turns">
+            <ul>
+                <li id="player-one">
+                    <img src="img/lulu_square.png" alt="" class ="your-turn">
+                    <p>Krishna</p>
+                </li>
+                <li id="player-two">
+                    <img src="img/teemo_square.png" alt="">
+                    <p>Oscar</p>
+                </li>
+                <li class="player-three">
+                    <img src="img/tristana_square.png" alt="">
+                    <p>Shenphen</p>
+                </li>
+                <li class="player-four">
+                    <img src="img/ziggs_square.png" alt="">
+                    <p>Ghost</p>
+                </li>
+            </ul>
+        </div>
+        <div class="die-section">
+            <div class="buttonPanel">
+                <button id="rollDie">ROLL</button>
+                <button id="confirm">GO!</button>
+            </div>
+            <div>
+                <div id="animation" class="dieObject"></div>
+            </div>
+        </div>
+    
+    </div>
+    
+    <div class="right-section">
+    
+        <div id="board" class="boardTiles">
+            <div id="pawn" class="pieceStyle">
+                <img src="img/pawnDefault.svg">
+            </div>
+        </div>
+    
+    </div>
+    
+</div>    
+
+<script src="js/bootstrap.min.js"></script>
+
+    <!--#########  Script to move the images #########-->
+    <script>
+
+        //Variables 
+        var rollBtn = document.getElementById('rollDie'); //button to roll the die
+        var goBtn = document.getElementById('confirm'); //move the pawn 
+        var pawn = document.getElementById('pawn'); //selects the pawn
+        
+        var dieResult = 0;
+        var currentTile = 1; 
+        var displacementDirection;
+
+        var pawnColor;
+        var pawnID;
+
+        var currentPositionX;
+        var currentPositionY;
+        var updatePositionX;
+        var updatePositionY;
+        var newLocation; 
+
+        goBtn.disabled = true; //disabled at the start of the turn
+
+        //Generate a random number
+        rollBtn.addEventListener('click', function(){
+            dieResult = randomNumGenerator();
+            console.log(dieResult);
+            startAnimation(dieResult);
+            goBtn.disabled = false; //enables the go button
+        })
+
+        //moves pawn according to die
+        goBtn.addEventListener('click', function(){
+            
+            //for loop
+            for(i = 1; i <= dieResult; i++){
+                
+                //check for transition tile
+                var  nextTile = currentTile + 1;
+                //console.log("updatedTile: " + nextTile);
+                checkForTransition(nextTile);
+                console.log("displacement dir: " + displacementDirection);
+                displacePawn(displacementDirection);
+                currentTile++;
+                console.log("currentTile: " + currentTile);
+                console.log("end of " + i + " displacement");
+            }
+            this.disabled = true;
+        })
+
+        function checkForTransition(nextTile){
+            if(nextTile < 4){
+                //displace down
+                displacementDirection = 2;
+            }else if(nextTile === 5){
+                //displace left
+                displacementDirection = 1;
+            }else if(nextTile === 11){
+                //displace down-long
+            }else if(nextTile === 13){
+                //displace right
+            }
+        }
+
+        function displacePawn(displacementDirection){
+            var dieOffset;
+            
+            if(displacementDirection === 0){
+
+            }else if(displacementDirection === 1){
+                //get current y position
+                currentPositionX = getPawnPositionX();
+
+                dieOffset = 26;
+                //for red pawn if "die offset > 78" && "currentPositionY"
+
+                updatePositionX = parseInt(currentPositionX) + dieOffset;
+                //console.log("position X: " + updatePositionX); 
+
+                newLocation = "translate3d("+ updatePositionX +"px, 176px, 0)";
+                pawn.style.transform = newLocation;
+
+            }else if(displacementDirection === 2){
+                
+                //get current y position
+                currentPositionY = getPawnPositionY();
+                currentPositionX = getPawnPositionX();
+
+                dieOffset = 26;
+                //for red pawn if "die offset > 78" && "currentPositionY"
+
+                updatePositionY = parseInt(currentPositionY) + dieOffset;
+                console.log("new position Y: " + updatePositionY); 
+
+                newLocation = "translate3d(200px, "+ updatePositionY + "px, 0)";
+                pawn.style.transform = newLocation;
+
+            }else if(displacementDirection === 3){
+
+            }
+        }
+
+        function getPawnPositionY(){
+            //retrieve value of translate3d
+            var currentPosition = window.getComputedStyle(pawn, null).getPropertyValue('-webkit-transform'); 
+            //pawn.style.transform;
+            //console.log(currentPosition);
+            var divideByComma = currentPosition.split(", ", 6); 
+            var lastElement = divideByComma[divideByComma.length - 1]; //gets the Y-position from the splitted array
+            var positionY = lastElement.slice(0, lastElement.length - 1); // removes the last parenthesis ")"
+            //console.log("Y value: " +positionY);
+            return positionY;
+        }
+
+        function getPawnPositionX(){
+            //retrieve value of translate3d
+            var currentPosition = window.getComputedStyle(pawn, null).getPropertyValue('-webkit-transform'); 
+            //pawn.style.transform;
+            console.log(currentPosition);
+            var divideByComma = currentPosition.split(", ", 5); 
+            var lastElement = divideByComma[divideByComma.length - 1]; //gets the Y-position from the splitted array
+            var positionX = lastElement.slice(0, lastElement.length - 1); // removes the last parenthesis ")"
+            console.log(positionX);
+            return positionX;
+        }
+
+        function randomNumGenerator(){
+            var roll = Math.floor(Math.random() * 6) + 1;
+            return roll;
+        }
+
+        function startAnimation(dieResult){
+    
+            var frameHeight = -120; 
+            var frame;
+            let dieOnScreen = document.querySelector('#animation');
+            let timeout = 0;
+            //console.log(dieOnScreen);
+            //audio.play();
+        
+            var animationLoop = setInterval( function() {
+                
+                var frames = Math.round(Math.random() * 5);
+                var finalFrame = (dieResult -1)*frameHeight;
+                frame = frames*frameHeight;
+                ++timeout;
+                dieOnScreen.style.backgroundPosition = frame + "px" + " 0px";
+                if (timeout == 14){
+                    clearInterval(animationLoop);
+                    dieOnScreen.style.backgroundPosition = finalFrame + "px" + " 0px";
+                }
+            }, 125);
+        }
+
+    </script>
+
+</body>
+</html>
